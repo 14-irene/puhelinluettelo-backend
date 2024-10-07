@@ -1,6 +1,12 @@
 const express = require('express')
+const morgan = require('morgan')
 const app = express()
 
+const token = morgan.token('body', (req, res) => req.method == 'POST'
+  ? JSON.stringify(req.body)
+  : ' '
+)
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 app.use(express.json())
 
 let persons = [
@@ -45,8 +51,6 @@ app.get('/info', (request, response) => {
 app.post('/api/persons', (req, res) => {
   const newId = () => `${Math.floor(Math.random() * Math.pow(10, 16))}`
   const newPerson = {id: newId(), ...req.body}
-  console.log(newPerson)
-  console.log(persons)
   if (newPerson) {
     if (persons.map(p => p.name).includes(newPerson.name)) {
       return res.status(400).json({error: 'name must be unique'})
