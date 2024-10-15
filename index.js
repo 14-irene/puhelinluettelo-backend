@@ -4,9 +4,8 @@ const morgan = require('morgan')
 const cors = require('cors')
 const app = express()
 const Person = require('./models/person')
-const mongoose = require('mongoose')
 
-const token = morgan.token('body', (req, res) => req.method == 'POST'
+morgan.token('body', (req) => req.method === 'POST'
   ? JSON.stringify(req.body)
   : ' '
 )
@@ -25,7 +24,7 @@ const errorHandler = (e, req, res, n) => {
   n(e)
 }
 
-const unknownEndpoint = (req, res) => 
+const unknownEndpoint = (req, res) =>
   res.status(404).send({ error: 'unknown endpoint' })
 
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
@@ -37,7 +36,7 @@ app.get('/api/persons', (req, res) => Person.find({}).then(p => res.json(p)))
 app.get('/api/persons/:id', (req, res, n) => {
   Person.findById(req.params.id)
     .then(p => {
-      if (p) res.json(p) 
+      if (p) res.json(p)
       else res.status(404).end()
     })
     .catch(e => n(e))
@@ -71,7 +70,7 @@ app.put('/api/persons/:id', (req, res, n) => {
   const id = req.params.id
   console.log('update request with data', number, id)
   try {
-    if (!number) throw "MissingContent"
+    if (!number) throw 'MissingContent'
     Person
       .findByIdAndUpdate(req.params.id, req.body,
         { new: true, runValidators: true, contect: 'query' })
@@ -81,11 +80,11 @@ app.put('/api/persons/:id', (req, res, n) => {
       }).catch(e => n(e))
   } catch (e) { n(e) }
 })
-  
+
 
 app.delete('/api/persons/:id', (req, res, n) => {
   Person.findByIdAndDelete(req.params.id)
-    .then(r => res.status(204).end())
+    .then(() => res.status(204).end())
     .catch(e => n(e))
 })
 

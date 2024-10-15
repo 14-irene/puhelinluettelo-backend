@@ -6,7 +6,7 @@ console.log(`connecting to ${url}`)
 
 mongoose.set('strictQuery', false)
 mongoose.connect(url)
-  .then(r => console.log('connected to mongoDB'))
+  .then(() => console.log('connected to mongoDB'))
   .catch((e) => console.log(`error connecting to mongoDB: ${e.message}`))
 
 const personSchema = new mongoose.Schema({
