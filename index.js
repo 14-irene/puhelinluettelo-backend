@@ -19,6 +19,9 @@ const errorHandler = (e, req, res, n) => {
   if (e.name === 'MissingContent') {
     return res.status(400).send({ error: 'missing content' })
   }
+  if (e.name === 'ValidationError') {
+    return res.status(400).send({ error: e.message })
+  }
   n(e)
 }
 
@@ -57,10 +60,9 @@ app.get('/info', (req, res) => {
 
 app.post('/api/persons', (req, res, n) => {
   const [name, number] = Object.values(req.body)
-  const person = new Person({ name, number })
   try {
-    if (!name || !number) throw "MissingContent"
-    person.save().then(p =>  res.json(p))
+    const person = new Person({ name, number })
+    person.save().then(p =>  res.json(p)).catch(e => n(e))
   } catch (e) { n(e) }
 })
 
@@ -71,11 +73,12 @@ app.put('/api/persons/:id', (req, res, n) => {
   try {
     if (!number) throw "MissingContent"
     Person
-      .findByIdAndUpdate(id, req.body)
+      .findByIdAndUpdate(req.params.id, req.body,
+        { new: true, runValidators: true, contect: 'query' })
       .then(d => {
         console.log(d ? `successfully updated: ${d.name}` : 'update failed')
         res.json(d)
-      })
+      }).catch(e => n(e))
   } catch (e) { n(e) }
 })
   
